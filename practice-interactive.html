@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Try Pandas: Interactive Practice | SAIL Workshop</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #00a86b;
+            --accent-color: #ff6b35;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --dark-bg: #1a1a2e;
+            --light-bg: #f8f9fa;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .header-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, var(--primary-color), #0052a3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--secondary-color), #00c97a);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Exercise Card */
+        .exercise {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            opacity: 0;
+            animation: fadeInUp 0.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .exercise.locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .exercise-number {
+            background: linear-gradient(135deg, var(--primary-color), #0052a3);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .exercise-title {
+            flex: 1;
+        }
+
+        .exercise-title h3 {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .exercise-type {
+            background: #f0f4ff;
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .exercise-content {
+            margin-bottom: 25px;
+        }
+
+        .instruction {
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .code-display {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        .code-keyword {
+            color: #f472b6;
+        }
+
+        .code-string {
+            color: #86efac;
+        }
+
+        .code-comment {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        /* Input Fields */
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        /* Multiple Choice */
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choice {
+            background: #f8fafc;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .choice:hover {
+            background: #f0f4ff;
+            border-color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .choice input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .choice-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #0052a3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #cbd5e1;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #d1fae5;
+            border: 2px solid var(--success-color);
+            color: #065f46;
+        }
+
+        .feedback.error {
+            background: #fee2e2;
+            border: 2px solid var(--error-color);
+            color: #991b1b;
+        }
+
+        .feedback-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .feedback-text {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feedback-explanation {
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .hint {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .hint.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Completion Screen */
+        .completion {
+            background: white;
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            display: none;
+        }
+
+        .completion.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .completion-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .completion h2 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .completion p {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Navigation */
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            background: linear-gradient(135deg, var(--secondary-color), #008c5a);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 168, 107, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .exercise {
+                padding: 25px;
+            }
+
+            .exercise-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Lock Icon */
+        .lock-icon {
+            color: #cbd5e1;
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🐼 Try Pandas: Interactive Practice</h1>
+            <p>Learn by doing! No setup required—practice right in your browser.</p>
+            <div class="header-badges">
+                <span class="badge">✨ No Installation</span>
+                <span class="badge">⚡ Instant Feedback</span>
+                <span class="badge">📱 Works on Mobile</span>
+                <span class="badge">🎯 7 Exercises</span>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-text">
+                <span>Your Progress</span>
+                <span id="progress-text">0 / 7 Complete</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill">0%</div>
+            </div>
+        </div>
+
+        <!-- Exercise 1: Multiple Choice -->
+        <div class="exercise" id="exercise1" data-exercise="1">
+            <div class="exercise-header">
+                <div class="exercise-number">1</div>
+                <div class="exercise-title">
+                    <h3>Understanding DataFrames</h3>
+                    <span class="exercise-type">Multiple Choice</span>
+                </div>
+            </div>
+            <div class="exercise-content">
+                <p class="instruction">What is a Pandas DataFrame?</p>
+                <div class="choices">
+                    <label class="choice">
+                        <input type="radio" name="q1" value="a">
+                        <span class="choice-text">A type of Python list</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q1" value="b">
+                        <span class="choice-text">A table-like data structure with rows and columns</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q1" value="c">
+                        <span class="choice-text">A database management system</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q1" value="d">
+                        <span class="choice-text">A type of spreadsheet file</span>
+                    </label>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkExercise1()">Check Answer</button>
+                <button class="btn btn-secondary" onclick="showHint(1)">Show Hint</button>
+            </div>
+            <div class="hint" id="hint1">
+                💡 Think about Excel or Google Sheets—what do they look like? DataFrames are similar!
+            </div>
+            <div class="feedback" id="feedback1"></div>
+        </div>
+
+        <!-- Exercise 2: Fill in the Blank -->
+        <div class="exercise locked" id="exercise2" data-exercise="2">
+            <div class="exercise-header">
+                <div class="exercise-number">2</div>
+                <div class="exercise-title">
+                    <h3>Viewing Your Data</h3>
+                    <span class="exercise-type">Fill in the Blank</span>
+                </div>
+            </div>
+            <div class="exercise-content">
+                <p class="instruction">Complete the code to display the first 10 rows of a DataFrame:</p>
+                <div class="code-display">
+<span class="code-comment"># Display the first 10 rows</span>
+df.<span class="code-keyword">_____</span>(10)
+                </div>
+                <input type="text" class="answer-input" id="answer2" placeholder="Type the method name here..." autocomplete="off">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkExercise2()">Check Answer</button>
+                <button class="btn btn-secondary" onclick="showHint(2)">Show Hint</button>
+            </div>
+            <div class="hint" id="hint2">
+                💡 Think about the "head" of the data—the top part!
+            </div>
+            <div class="feedback" id="feedback2"></div>
+        </div>
+
+        <!-- Exercise 3: Multiple Choice -->
+        <div class="exercise locked" id="exercise3" data-exercise="3">
+            <div class="exercise-header">
+                <div class="exercise-number">3</div>
+                <div class="exercise-title">
+                    <h3>Getting Dataset Information</h3>
+                    <span class="exercise-type">Multiple Choice</span>
+                </div>
+            </div>
+            <div class="exercise-content">
+                <p class="instruction">Which method shows you the number of rows and columns in a DataFrame?</p>
+                <div class="choices">
+                    <label class="choice">
+                        <input type="radio" name="q3" value="a">
+                        <span class="choice-text">df.size</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q3" value="b">
+                        <span class="choice-text">df.dimensions</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q3" value="c">
+                        <span class="choice-text">df.shape</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q3" value="d">
+                        <span class="choice-text">df.count()</span>
+                    </label>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkExercise3()">Check Answer</button>
+                <button class="btn btn-secondary" onclick="showHint(3)">Show Hint</button>
+            </div>
+            <div class="hint" id="hint3">
+                💡 The answer is an attribute (no parentheses needed) that describes the DataFrame's... shape!
+            </div>
+            <div class="feedback" id="feedback3"></div>
+        </div>
+
+        <!-- Exercise 4: Fill in the Blank -->
+        <div class="exercise locked" id="exercise4" data-exercise="4">
+            <div class="exercise-header">
+                <div class="exercise-number">4</div>
+                <div class="exercise-title">
+                    <h3>Finding Missing Data</h3>
+                    <span class="exercise-type">Fill in the Blank</span>
+                </div>
+            </div>
+            <div class="exercise-content">
+                <p class="instruction">Complete the code to count missing values in each column:</p>
+                <div class="code-display">
+<span class="code-comment"># Count missing values</span>
+df.<span class="code-keyword">_____</span>().sum()
+                </div>
+                <input type="text" class="answer-input" id="answer4" placeholder="Type the method name here..." autocomplete="off">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkExercise4()">Check Answer</button>
+                <button class="btn btn-secondary" onclick="showHint(4)">Show Hint</button>
+            </div>
+            <div class="hint" id="hint4">
+                💡 We're checking if values are "null" or empty. Think: is___null?
+            </div>
+            <div class="feedback" id="feedback4"></div>
+        </div>
+
+        <!-- Exercise 5: Multiple Choice -->
+        <div class="exercise locked" id="exercise5" data-exercise="5">
+            <div class="exercise-header">
+                <div class="exercise-number">5</div>
+                <div class="exercise-title">
+                    <h3>Filtering Data</h3>
+                    <span class="exercise-type">Multiple Choice</span>
+                </div>
+            </div>
+            <div class="exercise-content">
+                <p class="instruction">How do you filter a DataFrame to show only rows where Age is greater than 30?</p>
+                <div class="choices">
+                    <label class="choice">
+                        <input type="radio" name="q5" value="a">
+                        <span class="choice-text">df.filter(Age > 30)</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q5" value="b">
+                        <span class="choice-text">df[df['Age'] > 30]</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q5" value="c">
+                        <span class="choice-text">df.where('Age' > 30)</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q5" value="d">
+                        <span class="choice-text">df.select(Age > 30)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkExercise5()">Check Answer</button>
+                <button class="btn btn-secondary" onclick="showHint(5)">Show Hint</button>
+            </div>
+            <div class="hint" id="hint5">
+                💡 In Pandas, we use square brackets [] with a condition inside to filter rows.
+            </div>
+            <div class="feedback" id="feedback5"></div>
+        </div>
+
+        <!-- Exercise 6: Fill in the Blank -->
+        <div class="exercise locked" id="exercise6" data-exercise="6">
+            <div class="exercise-header">
+                <div class="exercise-number">6</div>
+                <div class="exercise-title">
+                    <h3>Calculating Averages</h3>
+                    <span class="exercise-type">Fill in the Blank</span>
+                </div>
+            </div>
+            <div class="exercise-content">
+                <p class="instruction">Complete the code to calculate the average (mean) age:</p>
+                <div class="code-display">
+<span class="code-comment"># Calculate average age</span>
+average_age = df[<span class="code-string">'Age'</span>].<span class="code-keyword">_____</span>()
+<span class="code-keyword">print</span>(f<span class="code-string">"Average age: {average_age}"</span>)
+                </div>
+                <input type="text" class="answer-input" id="answer6" placeholder="Type the method name here..." autocomplete="off">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkExercise6()">Check Answer</button>
+                <button class="btn btn-secondary" onclick="showHint(6)">Show Hint</button>
+            </div>
+            <div class="hint" id="hint6">
+                💡 In statistics, the average is also called the "mean." What method calculates the mean?
+            </div>
+            <div class="feedback" id="feedback6"></div>
+        </div>
+
+        <!-- Exercise 7: Multiple Choice -->
+        <div class="exercise locked" id="exercise7" data-exercise="7">
+            <div class="exercise-header">
+                <div class="exercise-number">7</div>
+                <div class="exercise-title">
+                    <h3>Grouping Data</h3>
+                    <span class="exercise-type">Multiple Choice</span>
+                </div>
+            </div>
+            <div class="exercise-content">
+                <p class="instruction">You want to calculate the average salary for each department. Which code is correct?</p>
+                <div class="choices">
+                    <label class="choice">
+                        <input type="radio" name="q7" value="a">
+                        <span class="choice-text">df.group('Department')['Salary'].mean()</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q7" value="b">
+                        <span class="choice-text">df.groupby('Department')['Salary'].mean()</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q7" value="c">
+                        <span class="choice-text">df.aggregate('Department', 'Salary')</span>
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="q7" value="d">
+                        <span class="choice-text">df['Department'].mean('Salary')</span>
+                    </label>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkExercise7()">Check Answer</button>
+                <button class="btn btn-secondary" onclick="showHint(7)">Show Hint</button>
+            </div>
+            <div class="hint" id="hint7">
+                💡 The method name is "groupby" (all one word) and it creates groups BY a certain column.
+            </div>
+            <div class="feedback" id="feedback7"></div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div class="completion" id="completion">
+            <div class="completion-icon">🎉</div>
+            <h2>Congratulations!</h2>
+            <p>You've completed all 7 exercises! You're ready to dive deeper into Pandas.</p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="final-score">7</div>
+                    <div class="stat-label">Exercises Completed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Progress</div>
+                </div>
+            </div>
+
+            <h3 style="color: var(--primary-color); margin: 30px 0 20px;">🚀 What's Next?</h3>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">← Back to Workshop Home</a>
+                <a href="https://colab.research.google.com" target="_blank" class="nav-link">Try Google Colab →</a>
+            </div>
+
+            <p style="margin-top: 30px; color: var(--text-light);">
+                Ready for the full workshop? Download the notebooks and start your data analysis journey!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Track progress
+        let completedExercises = 0;
+        const totalExercises = 7;
+
+        // Exercise 1: Multiple Choice
+        function checkExercise1() {
+            const selected = document.querySelector('input[name="q1"]:checked');
+            const feedback = document.getElementById('feedback1');
+            
+            if (!selected) {
+                showFeedback(feedback, false, 'Please select an answer!', '');
+                return;
+            }
+            
+            if (selected.value === 'b') {
+                showFeedback(feedback, true, 'Correct! 🎉', 
+                    'A DataFrame is indeed a table-like data structure with labeled rows and columns. Think of it like an Excel spreadsheet but more powerful!');
+                completeExercise(1);
+            } else {
+                showFeedback(feedback, false, 'Not quite right. Try again!', 
+                    'Think about what makes DataFrames useful for data analysis. They organize data in rows and columns, just like a spreadsheet.');
+            }
+        }
+
+        // Exercise 2: Fill in the blank
+        function checkExercise2() {
+            const answer = document.getElementById('answer2').value.trim().toLowerCase();
+            const feedback = document.getElementById('feedback2');
+            
+            if (answer === 'head') {
+                showFeedback(feedback, true, 'Perfect! 🎉', 
+                    'df.head(10) displays the first 10 rows. By default, head() shows 5 rows if you don\'t specify a number.');
+                completeExercise(2);
+            } else if (answer === '') {
+                showFeedback(feedback, false, 'Please type your answer!', '');
+            } else {
+                showFeedback(feedback, false, 'Not quite right. Try again!', 
+                    'Think about the top part of something. What\'s at the head?');
+            }
+        }
+
+        // Exercise 3: Multiple Choice
+        function checkExercise3() {
+            const selected = document.querySelector('input[name="q3"]:checked');
+            const feedback = document.getElementById('feedback3');
+            
+            if (!selected) {
+                showFeedback(feedback, false, 'Please select an answer!', '');
+                return;
+            }
+            
+            if (selected.value === 'c') {
+                showFeedback(feedback, true, 'Excellent! 🎉', 
+                    'df.shape returns a tuple like (891, 12) meaning 891 rows and 12 columns. Note: it\'s an attribute, not a method, so no parentheses!');
+                completeExercise(3);
+            } else {
+                showFeedback(feedback, false, 'Not quite right. Try again!', 
+                    'The answer describes the DataFrame\'s dimensions—its shape!');
+            }
+        }
+
+        // Exercise 4: Fill in the blank
+        function checkExercise4() {
+            const answer = document.getElementById('answer4').value.trim().toLowerCase();
+            const feedback = document.getElementById('feedback4');
+            
+            if (answer === 'isnull') {
+                showFeedback(feedback, true, 'Brilliant! 🎉', 
+                    'df.isnull().sum() first creates a boolean mask of missing values, then sum() counts the True values (missing data) in each column. You can also use isna() which does the same thing!');
+                completeExercise(4);
+            } else if (answer === 'isna') {
+                showFeedback(feedback, true, 'Brilliant! 🎉', 
+                    'df.isna().sum() works perfectly! isna() and isnull() are interchangeable—they both detect missing values.');
+                completeExercise(4);
+            } else if (answer === '') {
+                showFeedback(feedback, false, 'Please type your answer!', '');
+            } else {
+                showFeedback(feedback, false, 'Not quite right. Try again!', 
+                    'We need a method that checks if values are null or NA (Not Available).');
+            }
+        }
+
+        // Exercise 5: Multiple Choice
+        function checkExercise5() {
+            const selected = document.querySelector('input[name="q5"]:checked');
+            const feedback = document.getElementById('feedback5');
+            
+            if (!selected) {
+                showFeedback(feedback, false, 'Please select an answer!', '');
+                return;
+            }
+            
+            if (selected.value === 'b') {
+                showFeedback(feedback, true, 'Fantastic! 🎉', 
+                    'df[df[\'Age\'] > 30] uses boolean indexing: the inner part (df[\'Age\'] > 30) creates a True/False mask, and the outer brackets filter the DataFrame to keep only True rows.');
+                completeExercise(5);
+            } else {
+                showFeedback(feedback, false, 'Not quite right. Try again!', 
+                    'Pandas uses square brackets with a condition to filter. The pattern is: df[condition]');
+            }
+        }
+
+        // Exercise 6: Fill in the blank
+        function checkExercise6() {
+            const answer = document.getElementById('answer6').value.trim().toLowerCase();
+            const feedback = document.getElementById('feedback6');
+            
+            if (answer === 'mean') {
+                showFeedback(feedback, true, 'Perfect! 🎉', 
+                    'df[\'Age\'].mean() calculates the arithmetic mean (average) of the Age column. Other useful methods: median(), min(), max(), std() (standard deviation).');
+                completeExercise(6);
+            } else if (answer === '') {
+                showFeedback(feedback, false, 'Please type your answer!', '');
+            } else if (answer === 'average' || answer === 'avg') {
+                showFeedback(feedback, false, 'Close! But not quite...', 
+                    'In Pandas, the method is called mean() not average(). In statistics, the average is called the "mean."');
+            } else {
+                showFeedback(feedback, false, 'Not quite right. Try again!', 
+                    'What statistical term means "average"? Think about the mean value...');
+            }
+        }
+
+        // Exercise 7: Multiple Choice
+        function checkExercise7() {
+            const selected = document.querySelector('input[name="q7"]:checked');
+            const feedback = document.getElementById('feedback7');
+            
+            if (!selected) {
+                showFeedback(feedback, false, 'Please select an answer!', '');
+                return;
+            }
+            
+            if (selected.value === 'b') {
+                showFeedback(feedback, true, 'Amazing! You\'ve mastered the basics! 🎉', 
+                    'df.groupby(\'Department\')[\'Salary\'].mean() groups rows by Department, selects the Salary column, and calculates the mean for each group. This is like creating a pivot table in Excel!');
+                completeExercise(7);
+            } else {
+                showFeedback(feedback, false, 'Not quite right. Try again!', 
+                    'The method name is "groupby" (one word) and follows the pattern: df.groupby(column_to_group)[column_to_analyze].aggregation_function()');
+            }
+        }
+
+        // Helper Functions
+        function showFeedback(element, isCorrect, title, explanation) {
+            element.className = 'feedback show ' + (isCorrect ? 'success' : 'error');
+            const icon = isCorrect ? '✅' : '❌';
+            element.innerHTML = `
+                <div style="display: flex; align-items: start;">
+                    <span class="feedback-icon">${icon}</span>
+                    <div>
+                        <div class="feedback-text">${title}</div>
+                        ${explanation ? `<div class="feedback-explanation">${explanation}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showHint(exerciseNum) {
+            const hint = document.getElementById('hint' + exerciseNum);
+            hint.classList.add('show');
+        }
+
+        function completeExercise(exerciseNum) {
+            const currentExercise = document.getElementById('exercise' + exerciseNum);
+            
+            // Mark as complete (only once)
+            if (!currentExercise.dataset.completed) {
+                currentExercise.dataset.completed = 'true';
+                completedExercises++;
+                updateProgress();
+                
+                // Unlock next exercise
+                if (exerciseNum < totalExercises) {
+                    setTimeout(() => {
+                        const nextExercise = document.getElementById('exercise' + (exerciseNum + 1));
+                        nextExercise.classList.remove('locked');
+                        nextExercise.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 1000);
+                } else {
+                    // Show completion screen
+                    setTimeout(() => {
+                        document.getElementById('completion').classList.add('show');
+                        document.getElementById('completion').scrollIntoView({ behavior: 'smooth' });
+                    }, 1500);
+                }
+            }
+        }
+
+        function updateProgress() {
+            const percentage = (completedExercises / totalExercises) * 100;
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = Math.round(percentage) + '%';
+            progressText.textContent = `${completedExercises} / ${totalExercises} Complete`;
+        }
+
+        // Initialize progress
+        updateProgress();
+
+        // Allow Enter key to submit answers
+        document.querySelectorAll('.answer-input').forEach((input, index) => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const exerciseNum = index + 2; // Exercise 2 is first fill-in-blank
+                    if (exerciseNum === 2) checkExercise2();
+                    if (exerciseNum === 4) checkExercise4();
+                    if (exerciseNum === 6) checkExercise6();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
